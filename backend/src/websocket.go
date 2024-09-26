@@ -40,7 +40,7 @@ func (wss WebsocketServer) echo(w http.ResponseWriter, r *http.Request) {
 			break
 		}
 		log.Printf("recv: %s", message)
-		err = c.WriteMessage(mt, message)
+		err = c.WriteMessage(mt, []byte(fmt.Sprintf("server response: %s", string(message))))
 		if err != nil {
 			log.Println("write:", err)
 			break
