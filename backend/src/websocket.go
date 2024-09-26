@@ -23,7 +23,7 @@ var upgrader = websocket.Upgrader{
 		// allow all origins
 		return true
 	},
-} // use default options
+}
 
 func (wss WebsocketServer) echo(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Access-Control-Allow-Origin", wss.cors)
@@ -50,10 +50,13 @@ func (wss WebsocketServer) echo(w http.ResponseWriter, r *http.Request) {
 
 func (wss WebsocketServer) start() error {
 	http.HandleFunc("/echo", wss.echo)
+	fmt.Println("Websocket server starting on", wss.addr)
 	err := http.ListenAndServe(wss.addr, nil)
 	if err != nil {
 		return fmt.Errorf("ListenAndServe: %v", err)
 	}
+
+	fmt.Println("Websocket server started on", wss.addr)
 
 	return nil
 }

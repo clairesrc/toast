@@ -3,16 +3,7 @@
 Start locally:
 
 ```bash
-cd frontend
-yarn
-yarn start
+docker compose up --build --force-recreate -d
 ```
 
-Let this run in one terminal (or background it by adding `&` at the end of the command)
-
-In another terminal:
-
-```bash
-cd backend
-go run .
-```
+Then open: http://localhost:4000 in browser

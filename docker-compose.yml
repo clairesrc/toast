@@ -1,0 +1,39 @@
+services:
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: ./Dockerfile
+    image: breadgine-frontend:latest
+    ports:
+      - "4000:80"
+    depends_on:
+      - backend
+  backend:
+    container_name: breadgine-backend
+    build:
+      context: ./backend
+      dockerfile: ./Dockerfile
+    image: breadgine-backend:latest
+    ports:
+      - "8181:8181"
+    environment:
+      - DATABASE_URL=postgres://user:password@database:5432/db
+      - MONGODB_URL=mongodb://root:password@mongodb:27017
+    depends_on:
+      - database
+      - mongodb
+  database:
+    image: postgres:latest
+    ports:
+      - "5432:5432"
+    environment:
+      POSTGRES_USER: user
+      POSTGRES_PASSWORD: password
+      POSTGRES_DB: db
+  mongodb:
+    image: mongo:latest
+    ports:
+      - "27017:27017"
+    environment:
+      - MONGO_INITDB_ROOT_USERNAME=root
+      - MONGO_INITDB_ROOT_PASSWORD=password
