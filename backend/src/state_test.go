@@ -46,22 +46,22 @@ var testPlayer1FacingDown = player{
 func TestGameState(t *testing.T) {
 	// Create a new gameState
 	gs := gameState{
-		Players: make(map[string]player),
+		Players: []player{},
 	}
 
 	// Add a player
-	gs.Players["player1"] = testPlayer1FacingRight
+	gs.Players = append(gs.Players, testPlayer1FacingRight)
 
 	// Add another player
-	gs.Players["player2"] = player{
-		X:           10,
+	gs.Players = append(gs.Players, player{
+		X:           50,
 		Y:           0,
 		Name:        "player2",
 		Health:      100,
 		Facing:      "down",
 		IsAttacking: false,
 		Skin:        "skin2",
-	}
+	})
 
 	// Test playerAttackHit
 	hit, hitName := gs.playerAttackHit("player1")
@@ -70,20 +70,20 @@ func TestGameState(t *testing.T) {
 
 	// Test playerAttack
 	gs.playerAttack("player1")
-	require.Equal(t, 90, gs.Players["player2"].Health)
+	require.Equal(t, 90, gs.Players[1].Health)
 }
 
 var playerAttackHitTestCases = []struct {
 	Name     string
-	Players  map[string]player
+	Players  []player
 	expected bool
 }{
 	{
 		Name: "player1HitPlayerRight10UnitsAway",
-		Players: map[string]player{
-			"player1": testPlayer1FacingRight,
-			"player2": {
-				X:           10,
+		Players: []player{
+			testPlayer1FacingRight,
+			{
+				X:           playerSpriteWidth + 10,
 				Y:           0,
 				Name:        "player2",
 				Health:      100,
@@ -96,10 +96,10 @@ var playerAttackHitTestCases = []struct {
 	},
 	{
 		Name: "player1HitPlayerRight11UnitsAway",
-		Players: map[string]player{
-			"player1": testPlayer1FacingRight,
-			"player2": {
-				X:           11,
+		Players: []player{
+			testPlayer1FacingRight,
+			{
+				X:           playerSpriteWidth + 11,
 				Y:           0,
 				Name:        "player2",
 				Health:      100,
@@ -112,10 +112,10 @@ var playerAttackHitTestCases = []struct {
 	},
 	{
 		Name: "player1HitPlayerLeft10UnitsAway",
-		Players: map[string]player{
-			"player1": testPlayer1FacingLeft,
-			"player2": {
-				X:           -10,
+		Players: []player{
+			testPlayer1FacingLeft,
+			{
+				X:           0 - playerSpriteWidth - 10,
 				Y:           0,
 				Name:        "player2",
 				Health:      100,
@@ -128,10 +128,10 @@ var playerAttackHitTestCases = []struct {
 	},
 	{
 		Name: "player1HitPlayerLeft11UnitsAway",
-		Players: map[string]player{
-			"player1": testPlayer1FacingLeft,
-			"player2": {
-				X:           -11,
+		Players: []player{
+			testPlayer1FacingLeft,
+			{
+				X:           0 - playerSpriteWidth - 11,
 				Y:           0,
 				Name:        "player2",
 				Health:      100,
@@ -144,11 +144,11 @@ var playerAttackHitTestCases = []struct {
 	},
 	{
 		Name: "player1HitPlayerUp10UnitsAway",
-		Players: map[string]player{
-			"player1": testPlayer1FacingUp,
-			"player2": {
+		Players: []player{
+			testPlayer1FacingUp,
+			{
 				X:           0,
-				Y:           -10,
+				Y:           0 - playerSpriteHeight - 10,
 				Name:        "player2",
 				Health:      100,
 				Facing:      "down",
@@ -160,11 +160,11 @@ var playerAttackHitTestCases = []struct {
 	},
 	{
 		Name: "player1HitPlayerUp11UnitsAway",
-		Players: map[string]player{
-			"player1": testPlayer1FacingUp,
-			"player2": {
+		Players: []player{
+			testPlayer1FacingUp,
+			{
 				X:           0,
-				Y:           -11,
+				Y:           0 - playerSpriteHeight - 11,
 				Name:        "player2",
 				Health:      100,
 				Facing:      "down",
@@ -176,11 +176,11 @@ var playerAttackHitTestCases = []struct {
 	},
 	{
 		Name: "player1HitPlayerDown10UnitsAway",
-		Players: map[string]player{
-			"player1": testPlayer1FacingDown,
-			"player2": {
+		Players: []player{
+			testPlayer1FacingDown,
+			{
 				X:           0,
-				Y:           10,
+				Y:           playerSpriteHeight + 10,
 				Name:        "player2",
 				Health:      100,
 				Facing:      "down",
@@ -192,11 +192,11 @@ var playerAttackHitTestCases = []struct {
 	},
 	{
 		Name: "player1HitPlayerDown11UnitsAway",
-		Players: map[string]player{
-			"player1": testPlayer1FacingDown,
-			"player2": {
+		Players: []player{
+			testPlayer1FacingDown,
+			{
 				X:           0,
-				Y:           11,
+				Y:           playerSpriteHeight + 11,
 				Name:        "player2",
 				Health:      100,
 				Facing:      "down",
@@ -208,10 +208,10 @@ var playerAttackHitTestCases = []struct {
 	},
 	{
 		Name: "player1HitPlayerRight10UnitsAwayToTheLeft",
-		Players: map[string]player{
-			"player1": testPlayer1FacingRight,
-			"player2": {
-				X:           -10,
+		Players: []player{
+			testPlayer1FacingRight,
+			{
+				X:           0 - playerSpriteWidth - 10,
 				Y:           0,
 				Name:        "player2",
 				Health:      100,

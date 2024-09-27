@@ -8,6 +8,9 @@ import (
 	"time"
 )
 
+const playerSpriteHeight = 48
+const playerSpriteWidth = 48
+
 type gameState struct {
 	Players []player `json:"players"`
 }
@@ -28,6 +31,13 @@ type player struct {
 type gameEvent struct {
 	Type string `json:"type"`
 	Data player `json:"data"`
+}
+
+type attackHitbox struct {
+	topLeftCornerX     int
+	topLeftCornerY     int
+	bottomRightCornerX int
+	bottomRightCornerY int
 }
 
 func (gs *gameState) toJSON() []byte {
@@ -70,12 +80,12 @@ func (gs *gameState) refresh() {
 	// clear all player attacks if they have been attacking for more than 750ms
 	// clear all player walking states if they have been walking for more than 500ms
 	for i, p := range gs.Players {
-		if p.IsAttacking && time.Now().UnixMilli()-p.lastAttack > 750 {
+		if p.IsAttacking && time.Now().UnixMilli()-p.lastAttack > 400 {
 			fmt.Println("clearing attack for player", p.Name)
 			p.IsAttacking = false
 			gs.Players[i] = p
 		}
-		if p.IsWalking && time.Now().UnixMilli()-p.lastWalk > 500 {
+		if p.IsWalking && time.Now().UnixMilli()-p.lastWalk > 250 {
 			p.IsWalking = false
 			gs.Players[i] = p
 		}
@@ -112,22 +122,34 @@ func (gs *gameState) playerAttackHit(name string) (bool, string) {
 			continue
 		}
 
-		// is player within 10 units to the left, right, above or below this player?
-		if p.X >= playerX-10 && p.X <= playerX+10 && p.Y >= playerY-10 && p.Y <= playerY+10 {
-			// is player facing this player?
-			if playerFacing == "up" && p.Y < playerY {
-				return true, p.Name
-			}
-			if playerFacing == "down" && p.Y > playerY {
-				return true, p.Name
-			}
-			if playerFacing == "left" && p.X < playerX {
-				return true, p.Name
-			}
-			if playerFacing == "right" && p.X > playerX {
-				return true, p.Name
-			}
+		hitbox := attackHitbox{}
+		switch playerFacing {
+		case "up":
+			hitbox.topLeftCornerX = playerX
+			hitbox.topLeftCornerY = playerY - 10
+			hitbox.bottomRightCornerX = playerX + playerSpriteWidth
+			hitbox.bottomRightCornerY = playerY
+		case "down":
+			hitbox.topLeftCornerX = playerX
+			hitbox.topLeftCornerY = playerY + playerSpriteHeight
+			hitbox.bottomRightCornerX = playerX + playerSpriteWidth
+			hitbox.bottomRightCornerY = playerY + playerSpriteHeight + 10
+		case "left":
+			hitbox.topLeftCornerX = playerX - 10
+			hitbox.topLeftCornerY = playerY
+			hitbox.bottomRightCornerX = playerX
+			hitbox.bottomRightCornerY = playerY + playerSpriteHeight
+		case "right":
+			hitbox.topLeftCornerX = playerX + playerSpriteWidth
+			hitbox.topLeftCornerY = playerY
+			hitbox.bottomRightCornerX = playerX + playerSpriteWidth + 10
+			hitbox.bottomRightCornerY = playerY + playerSpriteHeight
 		}
+
+		if p.X+playerSpriteWidth >= hitbox.topLeftCornerX && p.X <= hitbox.bottomRightCornerX && p.Y+playerSpriteHeight >= hitbox.topLeftCornerY && p.Y <= hitbox.bottomRightCornerY {
+			return true, p.Name
+		}
+
 	}
 
 	return false, ""

@@ -56,21 +56,46 @@
     background-position: -48px -144px;
   }
 
-  &.attacking .player-sprite {
-    background-color: red;
-  }
-
   &.walking .player-sprite {
     background-position-x: 0;
     animation: walk 0.45s steps(2) infinite;
   }
 
-  &.attacking.facing-right .player-sprite::after {
-    width: 48px;
+  .player-sprite::after {
+    width: 81px;
     position: absolute;
     border-radius: 100%;
-    height: 48px;
-    border-right: 10px solid red;
+    height: 60px;
+    content: " ";
+    transition: opacity 0.2s;
+    opacity: 0;
+    box-shadow: 4px 4px 4px rgba(0, 0, 0, 0.4);
+  }
+
+  &.attacking .player-sprite::after {
+    opacity: 1;
+  }
+
+  &.facing-right .player-sprite::after {
+    border-right: 10px solid rgba(255, 255, 255, 0.8);
+    left: -20px;
+  }
+
+  &.facing-left .player-sprite::after {
+    border-left: 10px solid rgba(255, 255, 255, 0.8);
+    right: -20px;
+  }
+
+  &.facing-up .player-sprite::after {
+    border-top: 10px solid rgba(255, 255, 255, 0.8);
+    top: -20px;
+    left: -20px;
+  }
+
+  &.facing-down .player-sprite::after {
+    border-bottom: 10px solid rgba(255, 255, 255, 0.8);
+    bottom: -20px;
+    left: -20px;
   }
 }
 
