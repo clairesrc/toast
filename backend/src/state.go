@@ -23,8 +23,10 @@ type player struct {
 	Facing      string `json:"facing"`
 	IsAttacking bool   `json:"isAttacking"`
 	IsWalking   bool   `json:"isWalking"`
+	IsDodging   bool   `json:"isDodging"`
 	lastAttack  int64
 	lastWalk    int64
+	lastDodge   int64
 	Skin        string `json:"skin"`
 }
 
@@ -63,6 +65,10 @@ func (gs *gameState) handleEvent(event gameEvent) {
 		// handle walk event
 		gs.playerWalk(event.Data.Name, event.Data.Facing)
 	}
+	if event.Type == "dodge" {
+		// handle dodge event
+		gs.playerDodge(event.Data.Name)
+	}
 	if event.Type == "join" {
 		// handle join event
 		// data should be the name of the player joining
@@ -77,8 +83,6 @@ func (gs *gameState) handleEvent(event gameEvent) {
 
 func (gs *gameState) refresh() {
 	// refresh the game state
-	// clear all player attacks if they have been attacking for more than 750ms
-	// clear all player walking states if they have been walking for more than 500ms
 	for i, p := range gs.Players {
 		if p.IsAttacking && time.Now().UnixMilli()-p.lastAttack > 400 {
 			fmt.Println("clearing attack for player", p.Name)
@@ -87,6 +91,10 @@ func (gs *gameState) refresh() {
 		}
 		if p.IsWalking && time.Now().UnixMilli()-p.lastWalk > 250 {
 			p.IsWalking = false
+			gs.Players[i] = p
+		}
+		if p.IsDodging && time.Now().UnixMilli()-p.lastDodge > 300 {
+			p.IsDodging = false
 			gs.Players[i] = p
 		}
 	}
@@ -99,6 +107,30 @@ func (gs *gameState) removePlayer(name string) {
 			gs.Players = append(gs.Players[:i], gs.Players[i+1:]...)
 			return
 		}
+	}
+}
+
+func (gs *gameState) playerDodge(name string) {
+	// set the player to be dodging
+	p, err := gs.getPlayer(name)
+	if err != nil {
+		log.Println("cannot find dodging player")
+		return
+	}
+	p.IsDodging = true
+	p.lastDodge = time.Now().UnixMilli()
+	gs.updatePlayer(p)
+
+	// dodge roll should advance player 10 units in the direction they are facing
+	switch p.Facing {
+	case "up":
+		gs.movePlayer(name, p.X, p.Y-10)
+	case "down":
+		gs.movePlayer(name, p.X, p.Y+10)
+	case "left":
+		gs.movePlayer(name, p.X-10, p.Y)
+	case "right":
+		gs.movePlayer(name, p.X+10, p.Y)
 	}
 }
 
@@ -119,6 +151,9 @@ func (gs *gameState) playerAttackHit(name string) (bool, string) {
 
 	for _, p := range gs.Players {
 		if p.Name == name {
+			continue
+		}
+		if p.IsDodging {
 			continue
 		}
 
@@ -189,17 +224,39 @@ func (gs *gameState) playerWalk(name, direction string) {
 
 	p.IsWalking = true
 	p.lastWalk = time.Now().UnixMilli()
+	gs.updatePlayer(p)
 
 	switch direction {
 	case "up":
-		p.Y--
+		gs.movePlayer(name, p.X, p.Y-2)
 	case "down":
-		p.Y++
+		gs.movePlayer(name, p.X, p.Y+2)
 	case "left":
-		p.X--
+		gs.movePlayer(name, p.X-2, p.Y)
 	case "right":
-		p.X++
+		gs.movePlayer(name, p.X+2, p.Y)
 	}
+}
+
+func (gs *gameState) movePlayer(name string, x, y int) {
+	p, err := gs.getPlayer(name)
+	if err != nil {
+		log.Println("cannot find moving player")
+		return
+	}
+	// don't allow player to collide with other players' bounding box (taking into account sprite dimensions)
+	for _, player := range gs.Players {
+		if player.Name == name {
+			continue
+		}
+		if x+playerSpriteWidth >= player.X && x <= player.X+playerSpriteWidth && y+playerSpriteHeight >= player.Y && y <= player.Y+playerSpriteHeight {
+			return
+		}
+	}
+
+	// no collision, so move player
+	p.X = x
+	p.Y = y
 	gs.updatePlayer(p)
 }
 

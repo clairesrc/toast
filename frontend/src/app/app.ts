@@ -19,15 +19,22 @@ $(document).ready(function () {
 
   console.log(playerName);
 
+  const skins = ["default", "alt"];
+
+  // pick a random skin
+  const randomSkin = skins[Math.floor(Math.random() * skins.length)];
+
   const player1: PlayerState = {
     x: 0,
     y: 0,
     name: playerName,
     isAttacking: false,
     isWalking: false,
+    isDodging: false,
+    stamina: 100,
     health: 100,
     facing: "right",
-    skin: "default",
+    skin: randomSkin,
   };
 
   const gameWorld = document.getElementById("game-world");
@@ -126,6 +133,13 @@ $(document).ready(function () {
           JSON.stringify({
             data: player,
             type: "attack",
+          })
+        );
+      } else if (e.key === "Control") {
+        webSocketClient.send(
+          JSON.stringify({
+            data: player,
+            type: "dodge",
           })
         );
       }

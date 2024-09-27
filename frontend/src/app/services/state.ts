@@ -6,7 +6,9 @@ type PlayerState = {
   name: string;
   isWalking: boolean;
   isAttacking: boolean;
+  isDodging: boolean;
   health: number;
+  stamina: number;
   skin: string;
 };
 type GameState = {
@@ -33,6 +35,8 @@ const renderFromState = (
       oldPlayer.facing === player.facing &&
       oldPlayer.isAttacking === player.isAttacking &&
       oldPlayer.isWalking === player.isWalking &&
+      oldPlayer.isDodging === player.isDodging &&
+      oldPlayer.stamina === player.stamina &&
       oldPlayer.health === player.health
     ) {
       return;
@@ -55,10 +59,12 @@ const renderFromState = (
       gameWorld.innerHTML += `<div data-playername="${
         player.name
       }" class="player ${player.isAttacking ? "attacking" : ""} ${
-        player.isWalking ? "walking" : ""
-      } ${player.health == 0 ? "dead" : ""} facing-${player.facing} skin-${
-        player.skin
-      }" style="top: ${player.y}px; left: ${player.x}px;">
+        player.isDodging ? "dodging" : ""
+      } ${player.isWalking ? "walking" : ""} ${
+        player.health == 0 ? "dead" : ""
+      } facing-${player.facing} skin-${player.skin}" style="top: ${
+        player.y
+      }px; left: ${player.x}px;">
         <div class="player-sprite"></div><div class="player-data">
           <div class="player-name">${player.name}</div>
           <div class="player-health-bar">
@@ -79,9 +85,11 @@ const renderFromState = (
     if (currentPlayer) {
       currentPlayer.className = `player ${
         player.isAttacking ? "attacking" : ""
-      } ${player.isWalking ? "walking" : ""} ${
-        player.health == 0 ? "dead" : ""
-      } facing-${player.facing} skin-${player.skin}`;
+      } ${player.isDodging ? "dodging" : ""} ${
+        player.isWalking ? "walking" : ""
+      } ${player.health == 0 ? "dead" : ""} facing-${player.facing} skin-${
+        player.skin
+      }`;
       const playerHealthFigure = currentPlayer.querySelector(
         ".player-health-figure"
       );

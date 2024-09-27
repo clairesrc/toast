@@ -3,5 +3,8 @@
     &.skin-default .player-sprite {
       background-image: url(/src/assets/images/skin1.png);
     }
+    &.skin-alt .player-sprite {
+      background-image: url(/src/assets/images/skin2.png);
+    }
   }
 }

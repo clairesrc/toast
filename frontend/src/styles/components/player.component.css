@@ -61,6 +61,10 @@
     animation: walk 0.45s steps(2) infinite;
   }
 
+  &.dodging .player-sprite {
+    animation: dodge 0.3s steps(10) infinite;
+  }
+
   .player-sprite::after {
     width: 81px;
     position: absolute;
@@ -100,13 +104,19 @@
 }
 
 @keyframes walk {
-  /* 0% {
-    background-position-x: 0;
-  }
-  50% {
-    background-position-x: -96px;
-  } */
   100% {
     background-position-x: -96px;
+  }
+}
+
+@keyframes dodge {
+  0% {
+    transform: scaleY(1) translateY(0);
+  }
+  50% {
+    transform: scaleY(0.2) translateY(30px) rotate(180deg);
+  }
+  100% {
+    transform: scaleY(1) translateY(0) rotate(360deg);
   }
 }
