@@ -4,13 +4,15 @@
 
 Extremely cursed multiplayer RPG engine written in Go, Typescript with Websockets. Not quite what I would call a "game" or an "engine," mostly just a toy for me to use as a sandbox and figure out how common game mechanics are implemented.
 
+Combat mechanics include movement (arrow keys), attack (spacebar), dodgeroll (ctrl), health bar. In progress: death, stamina bar. A rudimentary player collision system prevents from moving into other players.
+
 The cursed part mainly refers to how I draw things in the browser: instead of something sensible like canvas or webgl, everything you see is drawn using direct DOM manipulation and CSS -- every object onscreen is an HTML element, animations are done using classes and keyframes, etc.
 
 Every action, from movement to attack animation duration to collision detection, is validated server-side -- the client just reacts to updates in the state object.
 
 You may notice the Docker compose file specifies a some persistence layer stuff i.e. a MongoDB and Postgres images -- these aren't in use yet but will eventually allow for multiple server instances, player accounts, and real RPG mechanics like experience points and equipment.
 
-Some other interesting things planned for the serverside include Kafka for game event delegation, which combined with some strategically placed load balancers could enable some pretty ridiculous scaling since I would be able to decompose the server monolith into a series of individual event handlers. At that point all the server entrypoint does is handle incoming Websocket messages by emitting them to Kafka, and also sending out heartbeat game state updates, which at that point will be fetched from MongoDB. 
+Some other interesting things planned for the serverside include Kafka for game event delegation, which combined with some strategically placed load balancers could enable some pretty ridiculous scaling since I would be able to decompose the server monolith into a series of individual event handlers. At that point all the server entrypoint does is handle incoming Websocket messages by emitting them to Kafka, and also sending out heartbeat game state updates, which at that point will be fetched from MongoDB.
 
 of course, to really leverage the server scaling gains i will need to optimize the clientside as well, mainly by ensuring the game state it receives only contains data relevant to what's onscreen or at least within the player's current world instance.
 
