@@ -4,7 +4,6 @@ class wsClient {
   connect(url: string, onMessage: (evt: any) => void): Promise<wsClient> {
     this.socket = new WebSocket(url);
     this.socket.onmessage = function (evt: any) {
-      console.log("RESPONSE: " + evt.data);
       onMessage(evt.data);
     };
     this.socket.onopen = function (evt) {

@@ -20,7 +20,7 @@
   position: relative;
 }
 
-.player {
-  display: inline-block;
+#game-world > div {
+  /* display: inline-block; */
   position: absolute;
 }

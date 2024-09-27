@@ -76,7 +76,6 @@ $(document).ready(function () {
         return;
       }
       if (e.key === "ArrowUp") {
-        player.y -= 10;
         player.facing = "up";
         webSocketClient.send(
           JSON.stringify({
@@ -85,7 +84,6 @@ $(document).ready(function () {
           })
         );
       } else if (e.key === "ArrowDown") {
-        player.y += 10;
         player.facing = "down";
         webSocketClient.send(
           JSON.stringify({
@@ -94,7 +92,6 @@ $(document).ready(function () {
           })
         );
       } else if (e.key === "ArrowLeft") {
-        player.x -= 10;
         player.facing = "left";
         webSocketClient.send(
           JSON.stringify({
@@ -103,7 +100,6 @@ $(document).ready(function () {
           })
         );
       } else if (e.key === "ArrowRight") {
-        player.x += 10;
         player.facing = "right";
         webSocketClient.send(
           JSON.stringify({
