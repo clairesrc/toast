@@ -1,0 +1,7 @@
+#game-world {
+  .player {
+    &.skin-default .player-sprite {
+      background-image: url(/src/assets/images/skin1.png);
+    }
+  }
+}

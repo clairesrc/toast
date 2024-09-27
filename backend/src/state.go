@@ -3,7 +3,9 @@ package main
 import (
 	"encoding/json"
 	"errors"
+	"fmt"
 	"log"
+	"time"
 )
 
 type gameState struct {
@@ -17,6 +19,9 @@ type player struct {
 	Health      int    `json:"health"`
 	Facing      string `json:"facing"`
 	IsAttacking bool   `json:"isAttacking"`
+	IsWalking   bool   `json:"isWalking"`
+	lastAttack  int64
+	lastWalk    int64
 	Skin        string `json:"skin"`
 }
 
@@ -37,7 +42,8 @@ func (gs *gameState) toJSON() []byte {
 
 func (gs *gameState) handleEvent(event gameEvent) {
 	if event.Type == "refresh" {
-		// do nothing. this is just the client asking for the latest state
+		// handle refresh event
+		gs.refresh()
 	}
 	if event.Type == "attack" {
 		// handle attack event
@@ -56,6 +62,23 @@ func (gs *gameState) handleEvent(event gameEvent) {
 		// handle leave event
 		// data should be the name of the player leaving
 		gs.removePlayer(event.Data.Name)
+	}
+}
+
+func (gs *gameState) refresh() {
+	// refresh the game state
+	// clear all player attacks if they have been attacking for more than 750ms
+	// clear all player walking states if they have been walking for more than 500ms
+	for i, p := range gs.Players {
+		if p.IsAttacking && time.Now().UnixMilli()-p.lastAttack > 750 {
+			fmt.Println("clearing attack for player", p.Name)
+			p.IsAttacking = false
+			gs.Players[i] = p
+		}
+		if p.IsWalking && time.Now().UnixMilli()-p.lastWalk > 500 {
+			p.IsWalking = false
+			gs.Players[i] = p
+		}
 	}
 }
 
@@ -111,6 +134,17 @@ func (gs *gameState) playerAttackHit(name string) (bool, string) {
 }
 
 func (gs *gameState) playerAttack(name string) {
+	// set the attacking player to be attacking
+	p, err := gs.getPlayer(name)
+	if err != nil {
+		log.Println("cannot find attacking player")
+		return
+	}
+	p.IsAttacking = true
+	p.lastAttack = time.Now().UnixMilli()
+	gs.updatePlayer(p)
+
+	// apply damage if another player was hit
 	hit, hitName := gs.playerAttackHit(name)
 	if hit {
 		hitPlayer, err := gs.getPlayer(hitName)
@@ -130,6 +164,10 @@ func (gs *gameState) playerWalk(name, direction string) {
 		return
 	}
 	p.Facing = direction
+
+	p.IsWalking = true
+	p.lastWalk = time.Now().UnixMilli()
+
 	switch direction {
 	case "up":
 		p.Y--

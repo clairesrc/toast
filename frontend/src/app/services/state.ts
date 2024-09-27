@@ -4,6 +4,7 @@ type PlayerState = {
   y: number;
   facing: string;
   name: string;
+  isWalking: boolean;
   isAttacking: boolean;
   health: number;
   skin: string;
@@ -31,29 +32,73 @@ const renderFromState = (
       oldPlayer.y === player.y &&
       oldPlayer.facing === player.facing &&
       oldPlayer.isAttacking === player.isAttacking &&
+      oldPlayer.isWalking === player.isWalking &&
       oldPlayer.health === player.health
     ) {
       return;
     }
 
-    // remove current player
-    const currentPlayer = gameWorld.querySelector(
-      `[data-playername="${player.name}"]`
-    );
-    if (currentPlayer) {
-      currentPlayer.remove();
+    // if player has been removed from state
+    if (!player) {
+      // remove current player
+      const currentPlayer = gameWorld.querySelector(
+        `[data-playername="${player.name}"]`
+      );
+      if (currentPlayer) {
+        currentPlayer.remove();
+      }
+      return;
     }
 
-    gameWorld.innerHTML += `<div data-playername="${
-      player.name
-    }" class="player ${player.isAttacking ? "attacking" : ""} ${
-      player.health == 0 ? "dead" : ""
-    } facing-${player.facing} skin-${player.skin}" style="top: ${
-      player.y
-    }px; left: ${player.x}px;">
-      <div class="player-name">${player.name}</div>
-      <div class="player-health">${player.health}</div>
-    </div>`;
+    // add new player element if just added
+    if (!oldPlayer) {
+      gameWorld.innerHTML += `<div data-playername="${
+        player.name
+      }" class="player ${player.isAttacking ? "attacking" : ""} ${
+        player.isWalking ? "walking" : ""
+      } ${player.health == 0 ? "dead" : ""} facing-${player.facing} skin-${
+        player.skin
+      }" style="top: ${player.y}px; left: ${player.x}px;">
+        <div class="player-sprite"></div><div class="player-data">
+          <div class="player-name">${player.name}</div>
+          <div class="player-health-bar">
+            <div class="player-health-figure">${player.health}</div>
+            <div class="player-health-bar-inner" style="width: ${
+              player.health
+            }%"></div>
+          </div>
+        </div>
+      </div>`;
+      return;
+    }
+
+    // update player classes and position
+    const currentPlayer = gameWorld.querySelector(
+      `[data-playername="${player.name}"]`
+    ) as HTMLElement;
+    if (currentPlayer) {
+      currentPlayer.className = `player ${
+        player.isAttacking ? "attacking" : ""
+      } ${player.isWalking ? "walking" : ""} ${
+        player.health == 0 ? "dead" : ""
+      } facing-${player.facing} skin-${player.skin}`;
+      const playerHealthFigure = currentPlayer.querySelector(
+        ".player-health-figure"
+      );
+      if (playerHealthFigure) {
+        playerHealthFigure.innerHTML = `${player.health}`;
+      }
+
+      // update player position using inline style tag
+      currentPlayer.style.top = `${player.y}px`;
+      currentPlayer.style.left = `${player.x}px`;
+      const playerHealthBar = currentPlayer.querySelector(
+        ".player-health-bar-inner"
+      ) as HTMLElement;
+      if (playerHealthBar) {
+        playerHealthBar.style.width = `${player.health}%`;
+      }
+    }
   });
 
   return state;
@@ -73,4 +118,4 @@ const findPlayer = (state: GameState, name: string) => {
   return state.players.find((player) => player.name === name) || false;
 };
 
-export { initialState, renderFromState, findPlayer, updatePlayer };
+export { initialState, renderFromState, findPlayer, updatePlayer, PlayerState };

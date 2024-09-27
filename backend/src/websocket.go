@@ -51,7 +51,6 @@ func (wss WebsocketServer) state(w http.ResponseWriter, r *http.Request) {
 		}
 		wss.gameState.handleEvent(event)
 
-		log.Printf("recv: %s", message)
 		err = c.WriteMessage(mt, wss.gameState.toJSON())
 		if err != nil {
 			log.Println("write:", err)

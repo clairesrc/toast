@@ -7,6 +7,7 @@ import {
   renderFromState,
   findPlayer,
   updatePlayer,
+  PlayerState,
 } from "./services/state";
 
 $(document).ready(function () {
@@ -18,14 +19,32 @@ $(document).ready(function () {
 
   console.log(playerName);
 
-  const player1 = {
+  const player1: PlayerState = {
     x: 0,
     y: 0,
     name: playerName,
     isAttacking: false,
+    isWalking: false,
     health: 100,
     facing: "right",
     skin: "default",
+  };
+
+  const gameWorld = document.getElementById("game-world");
+
+  const triggerAnimationClasses = () => {
+    // check if any players are attacking or walking
+    state.players.forEach((player) => {
+      const playerDiv = gameWorld.querySelector(
+        `[data-playername="${player.name}"]`
+      );
+      if (player.isAttacking) {
+        playerDiv.classList.add("attacking");
+      }
+      if (player.isWalking) {
+        playerDiv.classList.add("walking");
+      }
+    });
   };
 
   // instantiate the websocket client
@@ -37,21 +56,15 @@ $(document).ready(function () {
 
       // update state from websocket
       state = JSON.parse(gameStateFromServer);
+
+      renderFromState(oldState, state, gameWorld);
+
+      triggerAnimationClasses();
     })
     .then(initGame);
 
   function initGame(webSocketClient: wsClient) {
-    // re-render the game world
-    const gameWorld = document.getElementById("game-world");
-    const render = () => {
-      renderFromState(oldState, state, gameWorld);
-      oldState = JSON.parse(JSON.stringify(state));
-      requestAnimationFrame(render);
-    };
-
-    render();
-
-    // send refresh event every 100ms
+    // send refresh event every 50ms
     setInterval(() => {
       webSocketClient.send(
         JSON.stringify({
@@ -59,7 +72,7 @@ $(document).ready(function () {
           type: "refresh",
         })
       );
-    }, 100);
+    }, 50);
 
     // send a message to the server to add the player
     webSocketClient.send(
