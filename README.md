@@ -10,6 +10,12 @@ Every action, from movement to attack animation duration to collision detection,
 
 You may notice the Docker compose file specifies a some persistence layer stuff i.e. a MongoDB and Postgres images -- these aren't in use yet but will eventually allow for multiple server instances, player accounts, and real RPG mechanics like experience points and equipment.
 
+Some other interesting things planned for the serverside include Kafka for game event delegation, which combined with some strategically placed load balancers could enable some pretty ridiculous scaling since I would be able to decompose the server monolith into a series of individual event handlers. At that point all the server entrypoint does is handle incoming Websocket messages by emitting them to Kafka, and also sending out heartbeat game state updates, which at that point will be fetched from MongoDB. 
+
+of course, to really leverage the server scaling gains i will need to optimize the clientside as well, mainly by ensuring the game state it receives only contains data relevant to what's onscreen or at least within the player's current world instance.
+
+basically, i have a lot of neat ideas that will keep me hacking on this project for a long time. not sure it will ever be of use to anyone, but i am having fun regardless!
+
 
 ## Usage
 Start locally:
