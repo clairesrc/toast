@@ -4,26 +4,26 @@ module.exports = () => {
       test: /\.(png|jpg|gif)$/,
       use: [
         {
-          loader: 'file-loader',
+          loader: "file-loader",
           options: {
-            name: '[name].[ext]?[hash]',
-            publicPath: './dist',
-            outputPath: './images'
-          }
-        }
-      ]
+            name: "[name].[ext]?[hash]",
+            publicPath: "./dist",
+            outputPath: "./images",
+          },
+        },
+      ],
     },
     {
       test: /\.(woff(2)?|ttf|eot|svg)$/,
       use: [
         {
-          loader: 'file-loader',
+          loader: "file-loader",
           options: {
-            publicPath: './fonts',
-            outputPath: './fonts'
-          }
-        }
-      ]
-    }
+            publicPath: "./fonts",
+            outputPath: "./fonts",
+          },
+        },
+      ],
+    },
   ];
 };

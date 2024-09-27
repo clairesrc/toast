@@ -1,6 +1,7 @@
 package main
 
 import (
+	"encoding/json"
 	"fmt"
 	"log"
 	"net/http"
@@ -9,8 +10,9 @@ import (
 )
 
 type WebsocketServer struct {
-	addr string
-	cors string
+	addr      string
+	cors      string
+	gameState *gameState
 }
 
 var upgrader = websocket.Upgrader{
@@ -25,7 +27,7 @@ var upgrader = websocket.Upgrader{
 	},
 }
 
-func (wss WebsocketServer) echo(w http.ResponseWriter, r *http.Request) {
+func (wss WebsocketServer) state(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Access-Control-Allow-Origin", wss.cors)
 	c, err := upgrader.Upgrade(w, r, nil)
 	if err != nil {
@@ -39,8 +41,18 @@ func (wss WebsocketServer) echo(w http.ResponseWriter, r *http.Request) {
 			log.Println("read:", err)
 			break
 		}
+
+		// parse the message from json to gameEvent
+		event := gameEvent{}
+		err = json.Unmarshal(message, &event)
+		if err != nil {
+			log.Println("json unmarshal:", err)
+			break
+		}
+		wss.gameState.handleEvent(event)
+
 		log.Printf("recv: %s", message)
-		err = c.WriteMessage(mt, []byte(fmt.Sprintf("server response: %s", string(message))))
+		err = c.WriteMessage(mt, wss.gameState.toJSON())
 		if err != nil {
 			log.Println("write:", err)
 			break
@@ -49,7 +61,7 @@ func (wss WebsocketServer) echo(w http.ResponseWriter, r *http.Request) {
 }
 
 func (wss WebsocketServer) start() error {
-	http.HandleFunc("/echo", wss.echo)
+	http.HandleFunc("/state", wss.state)
 	fmt.Println("Websocket server starting on", wss.addr)
 	err := http.ListenAndServe(wss.addr, nil)
 	if err != nil {

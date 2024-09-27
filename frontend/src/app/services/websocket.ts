@@ -1,29 +1,33 @@
 // websockets client
-
-const websocketClient = {
-  connect: function (url: string, onMessage: (message: string) => void) {
-    var ws = new WebSocket(url);
-    ws.onmessage = function (evt: any) {
-      onMessage(evt);
+class wsClient {
+  socket: WebSocket | null = null;
+  connect(url: string, onMessage: (evt: any) => void): Promise<wsClient> {
+    this.socket = new WebSocket(url);
+    this.socket.onmessage = function (evt: any) {
+      console.log("RESPONSE: " + evt.data);
+      onMessage(evt.data);
     };
-    ws.onopen = function (evt) {
+    this.socket.onopen = function (evt) {
       console.log("OPEN");
     };
-    ws.onclose = function (evt) {
+    this.socket.onclose = function (evt) {
       console.log("CLOSE");
-      ws = null;
     };
-    ws.onerror = function (evt: any) {
+    this.socket.onerror = function (evt: any) {
       console.log("ERROR ", evt);
     };
-    return ws;
-  },
-  send: function (ws: WebSocket, message: string) {
-    ws.send(message);
-  },
-  close: function (ws: WebSocket) {
-    ws.close();
-  },
-};
+    return new Promise((resolve, reject) => {
+      this.socket?.addEventListener("open", () => {
+        resolve(this);
+      });
+    });
+  }
+  send(message: string) {
+    this.socket.send(message);
+  }
+  close() {
+    this.socket.close();
+  }
+}
 
-export default websocketClient;
+export default wsClient;

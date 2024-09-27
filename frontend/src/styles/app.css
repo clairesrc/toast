@@ -1,13 +1,26 @@
-@import './variables';
+@import "./variables";
 
 /* Import Vendor */
-@import 'vendor/bootstrap';
+@import "vendor/bootstrap";
 
 /* Import Base */
-@import 'base/global';
-@import 'base/fonts';
-@import 'base/states';
-@import 'base/utilities';
+@import "base/global";
+@import "base/fonts";
+@import "base/states";
+@import "base/utilities";
 
 /* Import Components */
-@import 'components/logo.component';
+@import "components/logo.component";
+
+#game-world {
+  width: 100%;
+  height: 100%;
+  min-height: 200px;
+  background: black;
+  position: relative;
+}
+
+.player {
+  display: inline-block;
+  position: absolute;
+}

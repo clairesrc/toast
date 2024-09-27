@@ -12,6 +12,9 @@ func main() {
 	wss := WebsocketServer{
 		addr: *addr,
 		cors: "*",
+		gameState: &gameState{
+			Players: []player{},
+		},
 	}
 	err := wss.start()
 	if err != nil {

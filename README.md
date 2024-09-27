@@ -1,6 +1,6 @@
 # breadgine
 
-Start locally:
+Start locallY:
 
 ```bash
 docker compose up --build --force-recreate -d

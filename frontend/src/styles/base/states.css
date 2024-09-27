@@ -7,7 +7,7 @@
  * <div class="is-disabled">
  */
 
-@import './mixins/media-suffixes';
+@import "./mixins/media-suffixes";
 
 .is {
   &-hidden {

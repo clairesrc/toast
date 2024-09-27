@@ -50,7 +50,7 @@ These are the most relevant technologies that this boilerplate includes, all of 
 - **StyleLint:** Linting for Styles.
 - **Prettier:** Formatter for Scripts and Styles.
 - **EditorConfig:** Formatter for files in general.
-- **Husky:** Used for attaching to git hooks and run scripts.
+- **HuskY:** Used for attaching to git hooks and run scripts.
 
 ### 🥑 Demo (In progress)
 
