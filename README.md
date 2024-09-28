@@ -1,6 +1,6 @@
 # breadgine
 
-![screenshot](https://github.com/user-attachments/assets/4748bbcb-c7d3-4f0d-b616-c57a02cb8bba)
+![image](https://github.com/user-attachments/assets/cea0ccda-5d4c-43dc-8c71-c357e72d5bb2)
 
 Extremely cursed multiplayer RPG engine written in Go, Typescript with Websockets. Not quite what I would call a "game" or an "engine," mostly just a toy for me to use as a sandbox and figure out how common game mechanics are implemented.
 
