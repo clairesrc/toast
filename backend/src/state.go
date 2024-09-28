@@ -3,13 +3,14 @@ package main
 import (
 	"encoding/json"
 	"errors"
-	"fmt"
 	"log"
 	"time"
 )
 
 const playerSpriteHeight = 48
 const playerSpriteWidth = 48
+
+const playerDodgeDistance = 24
 
 type gameState struct {
 	Players []player `json:"players"`
@@ -20,6 +21,7 @@ type player struct {
 	Y           int    `json:"y"`
 	Name        string `json:"name"`
 	Health      int    `json:"health"`
+	Stamina     int    `json:"stamina"`
 	Facing      string `json:"facing"`
 	IsAttacking bool   `json:"isAttacking"`
 	IsWalking   bool   `json:"isWalking"`
@@ -85,7 +87,6 @@ func (gs *gameState) refresh() {
 	// refresh the game state
 	for i, p := range gs.Players {
 		if p.IsAttacking && time.Now().UnixMilli()-p.lastAttack > 400 {
-			fmt.Println("clearing attack for player", p.Name)
 			p.IsAttacking = false
 			gs.Players[i] = p
 		}
@@ -97,7 +98,27 @@ func (gs *gameState) refresh() {
 			p.IsDodging = false
 			gs.Players[i] = p
 		}
+
+		// restore stamina gradually if below 100
+		if p.Stamina < 100 {
+			p.Stamina += 1
+			gs.Players[i] = p
+		}
 	}
+}
+
+func (gs *gameState) consumePlayerStamina(p player, staminaAmount int) {
+	// consume stamina from the player
+	p.Stamina -= staminaAmount
+	if p.Stamina < 0 {
+		p.Stamina = 0
+	}
+	gs.updatePlayer(p)
+}
+
+func (gs *gameState) playerHasStamina(p player, staminaAmount int) bool {
+	// check if the player has enough stamina
+	return p.Stamina >= staminaAmount
 }
 
 func (gs *gameState) removePlayer(name string) {
@@ -111,26 +132,34 @@ func (gs *gameState) removePlayer(name string) {
 }
 
 func (gs *gameState) playerDodge(name string) {
-	// set the player to be dodging
 	p, err := gs.getPlayer(name)
 	if err != nil {
 		log.Println("cannot find dodging player")
 		return
 	}
+
+	// check if the player has enough stamina to dodge
+	if !gs.playerHasStamina(p, 30) {
+		return
+	}
+
 	p.IsDodging = true
 	p.lastDodge = time.Now().UnixMilli()
 	gs.updatePlayer(p)
 
+	// consume stamina
+	gs.consumePlayerStamina(p, 30)
+
 	// dodge roll should advance player 10 units in the direction they are facing
 	switch p.Facing {
 	case "up":
-		gs.movePlayer(name, p.X, p.Y-10)
+		gs.movePlayer(name, p.X, p.Y-playerDodgeDistance)
 	case "down":
-		gs.movePlayer(name, p.X, p.Y+10)
+		gs.movePlayer(name, p.X, p.Y+playerDodgeDistance)
 	case "left":
-		gs.movePlayer(name, p.X-10, p.Y)
+		gs.movePlayer(name, p.X-playerDodgeDistance, p.Y)
 	case "right":
-		gs.movePlayer(name, p.X+10, p.Y)
+		gs.movePlayer(name, p.X+playerDodgeDistance, p.Y)
 	}
 }
 
@@ -191,15 +220,24 @@ func (gs *gameState) playerAttackHit(name string) (bool, string) {
 }
 
 func (gs *gameState) playerAttack(name string) {
-	// set the attacking player to be attacking
 	p, err := gs.getPlayer(name)
 	if err != nil {
 		log.Println("cannot find attacking player")
 		return
 	}
+
+	// check if the player has enough stamina to attack
+	if !gs.playerHasStamina(p, 25) {
+		return
+	}
+
+	// set the attacking player to be attacking
 	p.IsAttacking = true
 	p.lastAttack = time.Now().UnixMilli()
 	gs.updatePlayer(p)
+
+	// consume stamina
+	gs.consumePlayerStamina(p, 25)
 
 	// apply damage if another player was hit
 	hit, hitName := gs.playerAttackHit(name)

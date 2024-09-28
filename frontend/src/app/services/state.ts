@@ -22,7 +22,8 @@ var initialState: GameState = {
 const renderFromState = (
   oldState: GameState,
   state: GameState,
-  gameWorld: HTMLElement
+  gameWorld: HTMLElement,
+  userPlayerName: string
 ) => {
   // render players as needed
   state.players.forEach((player: PlayerState) => {
@@ -36,8 +37,9 @@ const renderFromState = (
       oldPlayer.isAttacking === player.isAttacking &&
       oldPlayer.isWalking === player.isWalking &&
       oldPlayer.isDodging === player.isDodging &&
-      oldPlayer.stamina === player.stamina &&
-      oldPlayer.health === player.health
+      oldPlayer.health === player.health &&
+      player.name == userPlayerName &&
+      oldPlayer.stamina === player.stamina
     ) {
       return;
     }
@@ -73,6 +75,14 @@ const renderFromState = (
               player.health
             }%"></div>
           </div>
+          ${
+            player.name == userPlayerName
+              ? `
+          <div class="player-stamina-bar">
+            <div class="player-stamina-bar-inner" style="width: ${player.stamina}%"></div>
+          </div>`
+              : ""
+          }
         </div>
       </div>`;
       return;
@@ -105,6 +115,16 @@ const renderFromState = (
       ) as HTMLElement;
       if (playerHealthBar) {
         playerHealthBar.style.width = `${player.health}%`;
+      }
+
+      if (player.name == userPlayerName) {
+        // update player stamina
+        const playerStaminaBar = currentPlayer.querySelector(
+          ".player-stamina-bar-inner"
+        ) as HTMLElement;
+        if (playerStaminaBar) {
+          playerStaminaBar.style.width = `${player.stamina}%`;
+        }
       }
     }
   });

@@ -51,6 +51,9 @@ $(document).ready(function () {
       if (player.isWalking) {
         playerDiv.classList.add("walking");
       }
+      if (player.isDodging) {
+        playerDiv.classList.add("dodging");
+      }
     });
   };
 
@@ -64,7 +67,7 @@ $(document).ready(function () {
       // update state from websocket
       state = JSON.parse(gameStateFromServer);
 
-      renderFromState(oldState, state, gameWorld);
+      renderFromState(oldState, state, gameWorld, playerName);
 
       triggerAnimationClasses();
     })

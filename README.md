@@ -4,7 +4,7 @@
 
 Extremely cursed multiplayer RPG engine written in Go, Typescript with Websockets. Not quite what I would call a "game" or an "engine," mostly just a toy for me to use as a sandbox and figure out how common game mechanics are implemented.
 
-Combat mechanics include movement (arrow keys), attack (spacebar), dodgeroll (ctrl), health bar. In progress: death, stamina bar. A rudimentary player collision system prevents from moving into other players.
+Combat mechanics include movement (arrow keys), attack (spacebar), dodgeroll (ctrl), health bar, stamina. A rudimentary player collision system prevents from moving into other players.
 
 The cursed part mainly refers to how I draw things in the browser: instead of something sensible like canvas or webgl, everything you see is drawn using direct DOM manipulation and CSS -- every object onscreen is an HTML element, animations are done using classes and keyframes, etc.
 
