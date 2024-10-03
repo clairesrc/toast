@@ -3,17 +3,17 @@ services:
     build:
       context: ./frontend
       dockerfile: ./Dockerfile
-    image: breadgine-frontend:latest
+    image: toast-frontend:latest
     ports:
       - "4000:80"
     depends_on:
       - backend
   backend:
-    container_name: breadgine-backend
+    container_name: toast-backend
     build:
       context: ./backend
       dockerfile: ./Dockerfile
-    image: breadgine-backend:latest
+    image: toast-backend:latest
     ports:
       - "8181:8181"
     environment:

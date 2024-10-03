@@ -1,4 +1,4 @@
-module breadgine-backend
+module toast-backend
 
 go 1.22.2
 
