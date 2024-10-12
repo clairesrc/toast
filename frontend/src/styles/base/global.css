@@ -6,7 +6,9 @@
 html,
 body {
   color: value($color-basic, lightest);
-  font-family: "OpenSans";
+  font-family: "Uncial Antiqua", system-ui;
+  font-weight: 400;
+  font-style: normal;
   font-size: calc($default-font-size * 0.65);
   height: 100%;
   width: 100%;
