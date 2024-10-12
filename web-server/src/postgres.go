@@ -9,9 +9,9 @@ import (
 )
 
 type pgRowUser struct {
-	id       int    `json:"id"`
-	name     string `json:"name"`
-	email    string `json:"email"`
+	Id       int    `json:"id"`
+	Name     string `json:"name"`
+	Email    string `json:"email"`
 	password string
 }
 
