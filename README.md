@@ -4,7 +4,9 @@
 
 Extremely cursed PVP multiplayer RPG engine written in Go, Typescript with Websockets. Mostly just a toy for me to use as a sandbox and figure out how common game mechanics are implemented.
 
-Combat mechanics include movement (arrow keys), attack (spacebar), dodgeroll (ctrl), health bar, stamina. A rudimentary player collision system prevents from moving into other players.
+Controls - movement (arrow keys), attack (spacebar), dodgeroll (ctrl), health bar, stamina. A rudimentary player collision system prevents from moving into other players.
+
+This is a multiplayer combat game. Run the server through Docker, then players can join the session from their web browser.
 
 ## Usage
 Start locally:
