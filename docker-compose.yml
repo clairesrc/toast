@@ -7,23 +7,40 @@ services:
     ports:
       - "4000:80"
     depends_on:
-      - backend
-  backend:
-    container_name: toast-backend
+      - websocket-server
+      - web-server
+  websocket-server:
+    container_name: toast-websocket-server
     build:
-      context: ./backend
+      context: ./websocket-server
       dockerfile: ./Dockerfile
-    image: toast-backend:latest
+    image: toast-websocket-server:latest
     ports:
       - "8181:8181"
+    depends_on:
+      - database
+      - mongodb
+  web-server:
+    container_name: toast-web-server
+    build:
+      context: ./web-server
+      dockerfile: ./Dockerfile
+    image: toast-web-server:latest
+    ports:
+      - "8080:8080"
     environment:
-      - DATABASE_URL=postgres://user:password@database:5432/db
-      - MONGODB_URL=mongodb://root:password@mongodb:27017
+      - POSTGRES_HOST=database
+      - POSTGRES_USER=user
+      - POSTGRES_PASSWORD=password
+      - POSTGRES_DB=db
+      - MONGODB_URI=mongodb://root:password@mongodb:27017
     depends_on:
       - database
       - mongodb
   database:
     image: postgres:latest
+    volumes:
+      - ./postgres-initdb:/docker-entrypoint-initdb.d/
     ports:
       - "5432:5432"
     environment:
