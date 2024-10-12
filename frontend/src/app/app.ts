@@ -27,6 +27,7 @@ $(document).ready(function () {
   const player1: PlayerState = {
     x: 0,
     y: 0,
+    zIndex: 0,
     name: playerName,
     isAttacking: false,
     isWalking: false,
@@ -41,7 +42,7 @@ $(document).ready(function () {
 
   const triggerAnimationClasses = () => {
     // check if any players are attacking or walking
-    state.players.forEach((player) => {
+    state.players.forEach((player: PlayerState) => {
       const playerDiv = gameWorld.querySelector(
         `[data-playername="${player.name}"]`
       );
