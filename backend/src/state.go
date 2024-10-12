@@ -138,12 +138,13 @@ func (gs *gameState) playerHasStamina(p player, staminaAmount int) bool {
 
 func (gs *gameState) removePlayer(name string) {
 	// remove the player with the given name
-	for i, p := range gs.Players {
-		if p.Name == name {
-			gs.Players = append(gs.Players[:i], gs.Players[i+1:]...)
-			return
+	newPlayers := []player{}
+	for _, p := range gs.Players {
+		if p.Name != name {
+			newPlayers = append(newPlayers, p)
 		}
 	}
+	gs.Players = newPlayers
 }
 
 func (gs *gameState) playerDodge(name string) {

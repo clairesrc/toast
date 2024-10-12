@@ -10,6 +10,7 @@ import {
   findPlayer,
   updatePlayer,
   PlayerState,
+  GameState,
 } from "./services/state";
 
 const gamepad = getGamepad();
@@ -44,9 +45,25 @@ $(document).ready(function () {
 
   const gameWorld = document.getElementById("game-world");
 
-  const triggerAnimationClasses = () => {
+  const triggerAnimationClasses = (
+    state: GameState,
+    clientPlayerName: string
+  ) => {
     // check if any players are attacking or walking
     state.players.forEach((player: PlayerState) => {
+      if (player.name === clientPlayerName) {
+        if (player.health <= 0) {
+          const gameOverDiv = gameWorld.querySelector(`.game-over`);
+          gameOverDiv.classList.remove("hidden");
+          quitGame(player1, webSocketClient);
+
+          // in 5 seconds, reload the page
+          setTimeout(() => {
+            window.location.reload();
+          }, 5000);
+        }
+      }
+
       const playerDiv = gameWorld.querySelector(
         `[data-playername="${player.name}"]`
       );
@@ -74,7 +91,7 @@ $(document).ready(function () {
 
       renderFromState(oldState, state, gameWorld, playerName);
 
-      triggerAnimationClasses();
+      triggerAnimationClasses(state, playerName);
     })
     .then(initGame);
 
@@ -154,12 +171,16 @@ $(document).ready(function () {
 
   // close the websocket connection when the page is closed
   window.addEventListener("beforeunload", function () {
-    webSocketClient.send(
-      JSON.stringify({
-        data: player1,
-        type: "leave",
-      })
-    );
-    webSocketClient.close();
+    quitGame(player1, webSocketClient);
   });
 });
+
+const quitGame = (player: PlayerState, webSocketClient: wsClient) => {
+  webSocketClient.send(
+    JSON.stringify({
+      data: player,
+      type: "leave",
+    })
+  );
+  webSocketClient.close();
+};

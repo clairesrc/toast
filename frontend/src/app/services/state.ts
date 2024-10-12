@@ -194,4 +194,11 @@ const findPlayer = (state: GameState, name: string) => {
   return state.players.find((player) => player.name === name) || false;
 };
 
-export { initialState, renderFromState, findPlayer, updatePlayer, PlayerState };
+export {
+  initialState,
+  renderFromState,
+  findPlayer,
+  updatePlayer,
+  PlayerState,
+  GameState,
+};
