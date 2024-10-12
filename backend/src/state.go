@@ -10,6 +10,9 @@ import (
 const playerSpriteHeight = 48
 const playerSpriteWidth = 48
 
+const playerHitboxHeight = 12
+const playerHitboxWidth = 24
+
 const playerDodgeDistance = 24
 
 type gameState struct {
@@ -30,6 +33,18 @@ type player struct {
 	lastWalk    int64
 	lastDodge   int64
 	Skin        string `json:"skin"`
+}
+
+type playerBoundingBox struct {
+	hitbox boundingBox `json:"hitbox"`
+	sprite boundingBox `json:"sprite"`
+}
+
+type boundingBox struct {
+	x      int `json:"x"`
+	y      int `json:"y"`
+	width  int `json:"width"`
+	height int `json:"height"`
 }
 
 type gameEvent struct {
@@ -278,16 +293,21 @@ func (gs *gameState) playerWalk(name, direction string) {
 
 func (gs *gameState) movePlayer(name string, x, y int) {
 	p, err := gs.getPlayer(name)
+
 	if err != nil {
 		log.Println("cannot find moving player")
 		return
 	}
 	// don't allow player to collide with other players' bounding box (taking into account sprite dimensions)
 	for _, player := range gs.Players {
+		otherPlayerBoundingBox := getPlayerBoundingBox(player)
+		otherPlayerHitboxX := otherPlayerBoundingBox.hitbox.x
+		otherPlayerHitboxY := otherPlayerBoundingBox.hitbox.y
+
 		if player.Name == name {
 			continue
 		}
-		if x+playerSpriteWidth >= player.X && x <= player.X+playerSpriteWidth && y+playerSpriteHeight >= player.Y && y <= player.Y+playerSpriteHeight {
+		if x+playerHitboxWidth >= otherPlayerHitboxX && x <= otherPlayerHitboxX+playerHitboxWidth && y+playerHitboxHeight >= otherPlayerHitboxY && y <= otherPlayerHitboxY+playerHitboxHeight {
 			return
 		}
 	}
@@ -332,5 +352,31 @@ func (gs *gameState) getPlayers() []player {
 func newGameState() gameState {
 	return gameState{
 		Players: []player{},
+	}
+}
+
+func getPlayerBoundingBox(p player) playerBoundingBox {
+	// figure out hitbox coordinates based on sprite position and dimensions
+	// hitbox is a rectangle with the same center as the sprite
+	const hitboxWidth = playerHitboxWidth
+	const hitboxHeight = playerHitboxHeight
+	const hitboxOffsetX = (playerSpriteWidth - hitboxWidth) / 2
+	const hitboxOffsetY = (playerSpriteHeight - hitboxHeight) / 2
+	hitboxTopLeftX := p.X + hitboxOffsetX
+	hitboxTopLeftY := p.Y + hitboxOffsetY
+
+	return playerBoundingBox{
+		hitbox: boundingBox{
+			x:      hitboxTopLeftX,
+			y:      hitboxTopLeftY,
+			width:  hitboxWidth,
+			height: hitboxHeight,
+		},
+		sprite: boundingBox{
+			x:      p.X,
+			y:      p.Y,
+			width:  playerSpriteWidth,
+			height: playerSpriteHeight,
+		},
 	}
 }

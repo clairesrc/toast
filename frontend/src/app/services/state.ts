@@ -2,6 +2,7 @@
 type PlayerState = {
   x: number;
   y: number;
+  zIndex: number;
   facing: string;
   name: string;
   isWalking: boolean;
@@ -15,10 +16,51 @@ type GameState = {
   players: PlayerState[];
 };
 
+const playerHitboxWidth: number = 24;
+const playerHitboxHeight: number = 12;
+const playerSpriteWidth: number = 48;
+const playerSpriteHeight: number = 48;
+
+type playerBoundingBox = {
+  hitbox: {
+    x: number;
+    y: number;
+    width: number;
+    height: number;
+  };
+  sprite: {
+    x: number;
+    y: number;
+    width: number;
+    height: number;
+  };
+};
+
 var initialState: GameState = {
   players: [],
 };
 
+const zIndexPrefix: number = 100;
+
+/* build player bounding box based on player position */
+const getPlayerBoundingBox = (player: PlayerState): playerBoundingBox => {
+  return {
+    hitbox: {
+      x: player.x + (playerSpriteWidth - playerHitboxWidth) / 2,
+      y: player.y + (playerSpriteHeight - playerHitboxHeight) / 2,
+      width: playerHitboxWidth,
+      height: playerHitboxHeight,
+    },
+    sprite: {
+      x: player.x,
+      y: player.y,
+      width: playerSpriteWidth,
+      height: playerSpriteHeight,
+    },
+  };
+};
+
+/* draw to the screen based on gamestate */
 const renderFromState = (
   oldState: GameState,
   state: GameState,
@@ -28,7 +70,7 @@ const renderFromState = (
   // render players as needed
   state.players.forEach((player: PlayerState) => {
     // compare with oldState to figure out if player needs to be re-rendered
-    const oldPlayer = findPlayer(oldState, player.name);
+    const oldPlayer: false | PlayerState = findPlayer(oldState, player.name);
     if (
       oldPlayer &&
       oldPlayer.x === player.x &&
@@ -43,6 +85,9 @@ const renderFromState = (
     ) {
       return;
     }
+
+    player.zIndex = parseInt(`${zIndexPrefix}${player.y}`);
+    const playerBoundingBox = getPlayerBoundingBox(player);
 
     // if player has been removed from state
     if (!player) {
@@ -65,8 +110,10 @@ const renderFromState = (
       } ${player.isWalking ? "walking" : ""} ${
         player.health == 0 ? "dead" : ""
       } facing-${player.facing} skin-${player.skin}" style="top: ${
-        player.y
-      }px; left: ${player.x}px;">
+        playerBoundingBox.sprite.y
+      }px; left: ${playerBoundingBox.sprite.x}px; z-index: ${zIndexPrefix}${
+        player.zIndex
+      };">
         <div class="player-sprite"></div><div class="player-data">
           <div class="player-name">${player.name}</div>
           <div class="player-health-bar">
@@ -110,6 +157,7 @@ const renderFromState = (
       // update player position using inline style tag
       currentPlayer.style.top = `${player.y}px`;
       currentPlayer.style.left = `${player.x}px`;
+      currentPlayer.style.zIndex = `${player.zIndex}`;
       const playerHealthBar = currentPlayer.querySelector(
         ".player-health-bar-inner"
       ) as HTMLElement;

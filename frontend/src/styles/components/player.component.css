@@ -82,6 +82,7 @@
     animation: dodge 0.3s steps(10) infinite;
   }
 
+  /* Attack animation */
   .player-sprite::after {
     width: 81px;
     position: absolute;
