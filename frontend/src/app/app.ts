@@ -1,6 +1,8 @@
 import $ from "jquery";
 import "styles/app.css";
 import "./vendor";
+import Player from "./player";
+import getGamepad from "./services/gamepad";
 import wsClient from "./services/websocket";
 import {
   initialState,
@@ -9,6 +11,8 @@ import {
   updatePlayer,
   PlayerState,
 } from "./services/state";
+
+const gamepad = getGamepad();
 
 $(document).ready(function () {
   var state = JSON.parse(JSON.stringify(initialState));
@@ -93,61 +97,58 @@ $(document).ready(function () {
       })
     );
 
+    // update gamepad state every animation frame and handle gamepad events
+    const updateGamepad = () => {
+      gamepad.update();
+
+      const player = findPlayer(state, playerName) as PlayerState;
+      const playerInstance = new Player(player, webSocketClient);
+      if (gamepad.buttonPressed("DPad-Up", true)) {
+        playerInstance.moveUp();
+      }
+      if (gamepad.buttonPressed("DPad-Down", true)) {
+        playerInstance.moveDown();
+      }
+      if (gamepad.buttonPressed("DPad-Left", true)) {
+        playerInstance.moveLeft();
+      }
+      if (gamepad.buttonPressed("DPad-Right", true)) {
+        playerInstance.moveRight();
+      }
+      if (gamepad.buttonPressed("RB", false)) {
+        playerInstance.attack();
+      }
+      if (gamepad.buttonPressed("B", false)) {
+        playerInstance.dodge();
+      }
+      state = updatePlayer(state, playerInstance.player);
+
+      requestAnimationFrame(updateGamepad);
+    };
+    updateGamepad();
+
     // react to keypress events using jquery
     $(document).keydown(function (e) {
       const player = findPlayer(state, playerName);
       if (!player) {
         return;
       }
+
+      const playerInstance = new Player(player, webSocketClient);
       if (e.key === "ArrowUp") {
-        player.facing = "up";
-        webSocketClient.send(
-          JSON.stringify({
-            data: player,
-            type: "walk",
-          })
-        );
+        playerInstance.moveUp();
       } else if (e.key === "ArrowDown") {
-        player.facing = "down";
-        webSocketClient.send(
-          JSON.stringify({
-            data: player,
-            type: "walk",
-          })
-        );
+        playerInstance.moveDown();
       } else if (e.key === "ArrowLeft") {
-        player.facing = "left";
-        webSocketClient.send(
-          JSON.stringify({
-            data: player,
-            type: "walk",
-          })
-        );
+        playerInstance.moveLeft();
       } else if (e.key === "ArrowRight") {
-        player.facing = "right";
-        webSocketClient.send(
-          JSON.stringify({
-            data: player,
-            type: "walk",
-          })
-        );
+        playerInstance.moveRight();
       } else if (e.key === " ") {
-        player.isAttacking = true;
-        webSocketClient.send(
-          JSON.stringify({
-            data: player,
-            type: "attack",
-          })
-        );
+        playerInstance.attack();
       } else if (e.key === "Control") {
-        webSocketClient.send(
-          JSON.stringify({
-            data: player,
-            type: "dodge",
-          })
-        );
+        playerInstance.dodge();
       }
-      state = updatePlayer(state, player);
+      state = updatePlayer(state, playerInstance.player);
     });
   }
 
