@@ -1,3 +1,4 @@
+// web-server/src/postgres.go
 package main
 
 import (
@@ -9,23 +10,26 @@ import (
 )
 
 type pgRowUser struct {
-	Id       int    `json:"id"`
-	Name     string `json:"name"`
-	Email    string `json:"email"`
+	Id      int    `json:"id"`
+	Name    string `json:"name"`
+	Email   string `json:"email"`
 	password string
 }
 
-// postgresClient is a wrapper around the sql.DB type
-// that allows us to mock the sql.DB type in tests
-// by embedding this type in another struct
-// and overriding the methods we need to mock
+// UserGetter is an interface for getting user data.  This allows us to mock
+// the database interaction during testing.
+type UserGetter interface {
+	GetUser(username string) (pgRowUser, error)
+}
+
 type postgresClient struct {
 	*sql.DB
 }
 
-func (p *postgresClient) getUser(username string) (pgRowUser, error) {
+// Implement the UserGetter interface
+func (p *postgresClient) GetUser(username string) (pgRowUser, error) {
 	var user pgRowUser
-	err := p.QueryRow("SELECT id, name, email, password FROM user WHERE name = $1", username).Scan(&user.id, &user.name, &user.email, &user.password)
+	err := p.QueryRow("SELECT id, name, email, password FROM user WHERE name = $1", username).Scan(&user.Id, &user.Name, &user.Email, &user.password)
 	if err != nil {
 		return user, fmt.Errorf("cannot get user from database: %w", err)
 	}
@@ -33,7 +37,7 @@ func (p *postgresClient) getUser(username string) (pgRowUser, error) {
 }
 
 // newPostgresClient creates a new postgresClient
-func newPostgresClient() (*postgresClient, error) {
+func newPostgresClient() (UserGetter, error) { // Return the interface, not the concrete type
 	if os.Getenv("POSTGRES_HOST") == "" {
 		return nil, fmt.Errorf("POSTGRES_HOST environment variable not set")
 	}

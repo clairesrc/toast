@@ -1,3 +1,4 @@
+// web-server/src/main.go
 package main
 
 import (
@@ -8,7 +9,7 @@ import (
 )
 
 type getUserInput struct {
-	username string `json:"username"`
+	Username string `json:"username"`
 }
 
 func main() {
@@ -17,7 +18,7 @@ func main() {
 		log.Fatal(err)
 	}
 
-	_, err = newMongoClient()
+	_, err = newMongoClient() // Assuming newMongoClient is defined elsewhere.
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -33,7 +34,7 @@ func main() {
 	http.ListenAndServe(":8080", nil)
 }
 
-func getUsers(w http.ResponseWriter, r *http.Request, pgDb *postgresClient) error {
+func getUsers(w http.ResponseWriter, r *http.Request, pgDb interface{}) error { // Use interface{} type
 	// get username from json post body, getUserInput type
 	var input getUserInput
 	err := json.NewDecoder(r.Body).Decode(&input)
@@ -43,10 +44,17 @@ func getUsers(w http.ResponseWriter, r *http.Request, pgDb *postgresClient) erro
 		return fmt.Errorf("cannot decode json input %s: %w", input, err)
 	}
 
+	// Type assertion to access the GetUser method.
+	postgresClient, ok := pgDb.(*postgresClient) // Convert pgDb to *postgresClient type
+	if !ok {
+		return fmt.Errorf("pgDb is not a *postgresClient")
+	}
+
 	// get user from postgres
-	user, err := pgDb.getUser(input.username)
+	user, err := postgresClient.GetUser(input.Username)
 	if err != nil {
 		log.Fatal(err)
+		return fmt.Errorf("cannot get user from database: %w", err) //return error so that error is handled
 	}
 
 	// return user as json
@@ -54,7 +62,7 @@ func getUsers(w http.ResponseWriter, r *http.Request, pgDb *postgresClient) erro
 	if err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
 		w.Write([]byte("cannot marshal user to json"))
-		return fmt.Errorf("cannot marshal user to json %s: %w", input.username, err)
+		return fmt.Errorf("cannot marshal user to json %s: %w", input.Username, err) //return error so that error is handled
 	}
 	w.WriteHeader(http.StatusOK)
 	w.Write(userJson)
